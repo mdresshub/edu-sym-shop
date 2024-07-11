@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {% for message in app.flashes('erfolg') %}
+        <div class="alert alert-success">
+            <h3>{{ message }}</h3>
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('fehler') %}
+        <div class="alert alert-danger">
+            <h3>{{ message }}</h3>
+        </div>
+    {% endfor %}
+    <br/>
+    <div class="container">
+        <h2>Gerichte bearbeiten</h2>
+        <br/>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Bestell Nr.</th>
+                    <th>Name</th>
+                    <th>Beschreibung</th>
+                    <th>Kategorie</th>
+                    <th>Preis</th>
+                    <th>Löschen</th>
+                    <th><a href="{{ path('app_gericht.anlegen') }}">Anlegen</a></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for gericht in gerichte %}
+                <tr>
+                    <td>{{ gericht.id }}</td>
+                    <td><a href="{{ path('app_gericht.anzeigen', {'id': gericht.id}) }}">{{ gericht.name }}</a></td>
+                    <td>{{ gericht.beschreibung }}</td>
+                    <td>{{ gericht.kategorie }}</td>
+                    <td>{{ gericht.preis }}</td>
+                    <td><a href="{{ path('app_gericht.entfernen', {'id': gericht.id}) }}">X</a></td>
+                    <td></td>
+                    {#<td>
+                        <a href="{{ path('gericht_show', {'id': gericht.id}) }}">show</a>
+                        <a href="{{ path('gericht_edit', {'id': gericht.id}) }}">edit</a>
+                    </td>#}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
