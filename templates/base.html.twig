@@ -50,11 +50,13 @@
         <img src="{{ asset('img/logo.png') }}" alt="">
     </a>
     <div class="header-right">
-        <a href="#" class="hr-btn">Help</a>
-        <span>|</span>
         <div class="user-panel">
-            <a href="" class="login">Login</a>
-            <a href="" class="register">Create an account</a>
+            {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+                <a href="{{ path('app_login') }}" class="register">Login</a>
+            {% endif %}
+            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            <a href="{{ path('app_logout') }}" class="register">Logout</a>
+            {% endif %}
         </div>
     </div>
     <ul class="main-menu">
@@ -62,16 +64,15 @@
         <li><a href="#">About</a></li>
         <li><a href="blog.html">News</a></li>
         <li><a href="contact.html">Contact</a></li>
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <li><a href="#">Mitarbeiter</a>
             <ul class="sub-menu">
                 <li><a href="{{ path('app_gericht.bearbeiten') }}">Gerichte</a></li>
                 <li><a href="{{ path('app_gericht.anlegen') }}">Anlegen</a></li>
-                <li><a href="playlist.html">Playlist</a></li>
-                <li><a href="artist.html">Artist</a></li>
-                <li><a href="blog.html">Blog</a></li>
-                <li><a href="contact.html">Contact</a></li>
+                <li><a href="{{ path('app_registrierung') }}">Registrieren</a></li>
             </ul>
         </li>
+        {% endif %}
     </ul>
 </header>
 <!-- Header section end -->
