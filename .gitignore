@@ -24,8 +24,7 @@
 !bin/symfony_requirements
 
 # Assets and user uploads
-/web/bundles/
-/web/uploads/
+/public/bilder/
 
 # PHPUnit
 /app/phpunit.xml
@@ -42,4 +41,3 @@
 
 # PHPStorm
 /.idea/
-
