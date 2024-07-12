@@ -46,13 +46,13 @@
 
 <!-- Header section -->
 <header class="header-section clearfix">
-    <a href="index.html" class="site-logo">
+    <a href="{{ path('app_home') }}" class="site-logo">
         <img src="{{ asset('img/logo.png') }}" alt="">
     </a>
     <div class="header-right">
         <div class="user-panel">
             {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
-                <a href="{{ path('app_login') }}" class="register">Login</a>
+            <a href="{{ path('app_login') }}" class="register">Login</a>
             {% endif %}
             {% if is_granted('IS_AUTHENTICATED_FULLY') %}
             <a href="{{ path('app_logout') }}" class="register">Logout</a>
@@ -61,7 +61,7 @@
     </div>
     <ul class="main-menu">
         <li><a href="{{ path('app_home') }}">Home</a></li>
-        <li><a href="#">About</a></li>
+        <li><a href="{{ path('app_menue') }}">Menükarte</a></li>
         <li><a href="blog.html">News</a></li>
         <li><a href="contact.html">Contact</a></li>
         {% if is_granted('IS_AUTHENTICATED_FULLY') %}
