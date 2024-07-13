@@ -16,7 +16,7 @@ class MenueController extends AbstractController
     {
         $gerichte = $gerichtRepository->findAll();
 
-        return $this->render('menue/index.html.twig', [
+        return $this->render('menue/menue.html.twig', [
             'controller_name' => 'MenueController',#
             'gerichte' => $gerichte,
         ]);

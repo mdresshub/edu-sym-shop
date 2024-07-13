@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello BestellungController!{% endblock %}
+
+{% block body %}
+
+    {% set summe = 0 %}
+    {% for bestellung in bestellungen %}
+        {% set summe = summe + bestellung.preis %}
+    {% endfor %}
+
+    <br/>
+    <div class="container">
+        <h2>Ihre Bestellung</h2>
+        <br/>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Bestell-Nr.</th>
+                    <th scope="col">Gericht</th>
+                    <th scope="col">Preis</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Löschen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bestellung in bestellungen %}
+                    <tr>
+                        <td>{{ bestellung.id }}</td>
+                        <td>{{ bestellung.name }}</td>
+                        <td>{{ bestellung.preis }} EUR</td>
+                        <td>{{ bestellung.status }}</td>
+                        <td><a class="btn btn-outline-danger btn-sm" href="{{ path('app_bestellen', {id: bestellung.id}) }}">Löschen</a></td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td></td>
+                    <td><b>Summe:</b></td>
+                    <td><b>{{ summe }} EUR</b></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
