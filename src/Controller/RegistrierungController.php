@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class RegistrierungController extends AbstractController
 {
@@ -22,9 +23,10 @@ class RegistrierungController extends AbstractController
     public function registrierung(
         Request $request,
         ManagerRegistry $managerRegistry,
-        UserPasswordHasherInterface $userPasswordHasher
+        UserPasswordHasherInterface $userPasswordHasher,
+        ValidatorInterface $validator,
     ): Response {
-        $regForm = $this->createFormBuilder()
+        $registrierungForm = $this->createFormBuilder()
             ->add('username', TextType::class)
             ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
@@ -36,16 +38,27 @@ class RegistrierungController extends AbstractController
             ->add('submit', SubmitType::class)
             ->getForm();
 
-        $regForm->handleRequest($request);
+        $registrierungForm->handleRequest($request);
 
-        if ($regForm->isSubmitted() && $regForm->isValid()) {
-            $formData = $regForm->getData();
+        if ($registrierungForm->isSubmitted() && $registrierungForm->isValid()) {
+            $formData = $registrierungForm->getData();
 
             //dump($formData);
 
             $user = new User();
             $user->setUsername($formData['username']);
+            $user->setRawPassword($formData['password']);
             $user->setPassword($userPasswordHasher->hashPassword($user, $formData['password']));
+
+            $errors = $validator->validate($user);
+
+            if (count($errors) > 0) {
+                return $this->render('registrierung/registrierung.html.twig', [
+                    'controller_name' => 'RegistrierungController',
+                    'registrierungForm' => $registrierungForm->createView(),
+                    'errors' => $errors,
+                ]);
+            }
 
             $entityManager = $managerRegistry->getManager();
             $entityManager->persist($user);
@@ -56,7 +69,8 @@ class RegistrierungController extends AbstractController
 
         return $this->render('registrierung/registrierung.html.twig', [
             'controller_name' => 'RegistrierungController',
-            'registrierungForm' => $regForm->createView(),
+            'registrierungForm' => $registrierungForm->createView(),
+            'errors' => [],
         ]);
     }
 }
