@@ -9,6 +9,12 @@
         {% set summe = summe + bestellung.preis %}
     {% endfor %}
 
+    {% for message in app.flashes('bestellung') %}
+        <div class="alert alert-success" role="alert">
+            <h3>{{ message }}</h3>
+        </div>
+    {% endfor %}
+
     <br/>
     <div class="container">
         <h2>Ihre Bestellung</h2>
@@ -29,8 +35,27 @@
                         <td>{{ bestellung.id }}</td>
                         <td>{{ bestellung.name }}</td>
                         <td>{{ bestellung.preis }} EUR</td>
-                        <td>{{ bestellung.status }}</td>
-                        <td><a class="btn btn-outline-danger btn-sm" href="{{ path('app_bestellen', {id: bestellung.id}) }}">Löschen</a></td>
+                        <td>
+                            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                            <div class="dropdown show">
+                                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    {{ bestellung.status }}
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                    <a class="dropdown-item" href="{{ path('app_bestellung_status', {id: bestellung.id, status: 'offen'}) }}">offen</a>
+                                    <a class="dropdown-item" href="{{ path('app_bestellung_status', {id: bestellung.id, status: 'fertig'}) }}">fertig</a>
+                                    <a class="dropdown-item" href="{{ path('app_bestellung_status', {id: bestellung.id, status: 'archiv'}) }}">archiv</a>
+                                </div>
+                            </div>
+                            {% else %}
+                            {{ bestellung.status }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if bestellung.status == 'offen' %}
+                            <a class="btn btn-outline-danger btn-sm" href="{{ path('app_bestellung_entfernen', {id: bestellung.id}) }}">Entfernen</a>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
                 <tr>

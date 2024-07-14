@@ -43,4 +43,30 @@ class BestellungController extends AbstractController
 
         return $this->redirectToRoute('app_menue');
     }
+
+    #[Route('/bestellung/{id}/status/{status}', name: 'app_bestellung_status')]
+    public function bestellungStatus(Bestellung $bestellung, string $status, ManagerRegistry $managerRegistry): Response
+    {
+        $bestellung->setStatus($status);
+
+        $entityManager = $managerRegistry->getManager();
+        $entityManager->persist($bestellung);
+        $entityManager->flush();
+
+        $this->addFlash('bestellung', $bestellung->getName() . ' wurde erfolgreich auf ' . $status . ' gesetzt.');
+
+        return $this->redirectToRoute('app_bestellung');
+    }
+
+    #[Route('/bestellung/{id}/entfernen', name: 'app_bestellung_entfernen')]
+    public function bestellungEntfernen(Bestellung $bestellung, ManagerRegistry $managerRegistry): Response
+    {
+        $entityManager = $managerRegistry->getManager();
+        $entityManager->remove($bestellung);
+        $entityManager->flush();
+
+        $this->addFlash('bestellung', $bestellung->getName() . ' wurde erfolgreich entfernt.');
+
+        return $this->redirectToRoute('app_bestellung');
+    }
 }
