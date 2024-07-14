@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -23,10 +24,30 @@ class RegistrierungController extends AbstractController
     public function registrierung(
         Request $request,
         ManagerRegistry $managerRegistry,
-        UserPasswordHasherInterface $userPasswordHasher,
-        ValidatorInterface $validator,
+        UserPasswordHasherInterface $passwordHasher,
+        ValidatorInterface $validator
     ): Response {
-        $registrierungForm = $this->createFormBuilder()
+        $registrierungForm = $this->buildRegistrierungForm();
+        $registrierungForm->handleRequest($request);
+
+        if ($registrierungForm->isSubmitted() && $registrierungForm->isValid()) {
+            $user = $this->createUserFromForm($registrierungForm, $passwordHasher);
+            $errors = $validator->validate($user);
+
+            if (count($errors) > 0) {
+                return $this->renderRegistrierungForm($registrierungForm, $errors);
+            }
+
+            $this->saveUser($user, $managerRegistry);
+            return $this->redirectToRoute('app_home');
+        }
+
+        return $this->renderRegistrierungForm($registrierungForm);
+    }
+
+    private function buildRegistrierungForm(): FormInterface
+    {
+        return $this->createFormBuilder()
             ->add('username', TextType::class)
             ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
@@ -37,40 +58,33 @@ class RegistrierungController extends AbstractController
             ])
             ->add('submit', SubmitType::class)
             ->getForm();
+    }
 
-        $registrierungForm->handleRequest($request);
+    private function createUserFromForm($form, UserPasswordHasherInterface $userPasswordHasher): User
+    {
+        $formData = $form->getData();
 
-        if ($registrierungForm->isSubmitted() && $registrierungForm->isValid()) {
-            $formData = $registrierungForm->getData();
+        $user = new User();
+        $user->setUsername($formData['username']);
+        $user->setRawPassword($formData['password']);
+        $user->setPassword($userPasswordHasher->hashPassword($user, $formData['password']));
 
-            //dump($formData);
+        return $user;
+    }
 
-            $user = new User();
-            $user->setUsername($formData['username']);
-            $user->setRawPassword($formData['password']);
-            $user->setPassword($userPasswordHasher->hashPassword($user, $formData['password']));
-
-            $errors = $validator->validate($user);
-
-            if (count($errors) > 0) {
-                return $this->render('registrierung/registrierung.html.twig', [
-                    'controller_name' => 'RegistrierungController',
-                    'registrierungForm' => $registrierungForm->createView(),
-                    'errors' => $errors,
-                ]);
-            }
-
-            $entityManager = $managerRegistry->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_home');
-        }
-
+    private function renderRegistrierungForm($form, $errors = []): Response
+    {
         return $this->render('registrierung/registrierung.html.twig', [
             'controller_name' => 'RegistrierungController',
-            'registrierungForm' => $registrierungForm->createView(),
-            'errors' => [],
+            'registrierungForm' => $form->createView(),
+            'errors' => $errors,
         ]);
+    }
+
+    private function saveUser(User $user, ManagerRegistry $managerRegistry): void
+    {
+        $entityManager = $managerRegistry->getManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
     }
 }
