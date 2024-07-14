@@ -1,5 +1,7 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Menükarte | Auswahl{% endblock %}
+
 {% block body %}
     {%  for message in app.flashes('bestellung') %}
     <div class="alert alert-success" role="alert">

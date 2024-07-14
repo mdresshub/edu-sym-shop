@@ -1,5 +1,7 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Gerichte | Übersicht{% endblock %}
+
 {% block body %}
     {% for message in app.flashes('erfolg') %}
         <div class="alert alert-success">
