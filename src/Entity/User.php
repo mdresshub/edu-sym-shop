@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Validator as CustomAssert;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -31,6 +32,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[CustomAssert\StrongPassword]
     #[Assert\NotCompromisedPassword(
         message: 'Das Passwort  wurde bereits in einer Datenbankverletzung veröffentlicht und kann daher 
                 nicht als Passwort verwendet werden. Bitte verwenden Sie ein anderes Passwort.'
