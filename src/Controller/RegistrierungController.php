@@ -48,15 +48,15 @@ class RegistrierungController extends AbstractController
     private function buildRegistrierungForm(): FormInterface
     {
         return $this->createFormBuilder()
-            ->add('username', TextType::class)
+            ->add('username', TextType::class, ['label' => 'Benutzername'])
             ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'invalid_message' => 'Die Passwörter müssen übereinstimmen.',
                 'required' => true,
-                'first_options' => ['label' => 'Passwort'],
+                'first_options' => ['label' => 'Passwort (min. 8 Zeichen, 1 Ziffer, 1 Sonderzeichen, 1 Groß- und 1 Kleinbuchstabe)'],
                 'second_options' => ['label' => 'Passwort wiederholen'],
             ])
-            ->add('submit', SubmitType::class)
+            ->add('submit', SubmitType::class, ['label' => 'Registrieren'])
             ->getForm();
     }
 

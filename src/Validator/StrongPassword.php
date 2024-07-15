@@ -18,5 +18,5 @@ class StrongPassword extends Constraint
      * Any public properties become valid options for the annotation.
      * Then, use these in your validator class.
      */
-    public string $message = 'Das gewählte Passwort "{{ value }}" ist nicht stark genug.';
+    public string $message = 'Das gewählte Passwort "{{ value }}" ist nicht stark genug. (min. 8 Zeichen, 1 Ziffer, 1 Sonderzeichen, 1 Groß- und 1 Kleinbuchstabe)';
 }
