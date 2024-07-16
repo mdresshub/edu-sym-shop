@@ -33,7 +33,7 @@ class BestellungControllerTest extends TestCase
         $bestellungRepository
             ->expects($this->once())
             ->method('findBy')
-            ->with(['tisch' => 'tisch1'])
+            ->with(['tisch' => $this->getBestellungData()['tisch']])
             ->willReturn([$bestellung]);
 
         $controller = new BestellungController();
@@ -41,18 +41,29 @@ class BestellungControllerTest extends TestCase
         $response = $controller->bestellung($bestellungRepository);
 
         $this->assertEquals( 200 , $response->getStatusCode());
-        //$this->assertContains( 'TBD!!!' , $response->getContent());
     }
 
     public function testBestellen(): void
     {
-        $gericht = $this->createGerichtMock();
+        $gericht = $this->createMock(Gericht::class);
         $managerRegistry = $this->createManagerRegistryMock();
+
+        $gericht
+            ->method('getId')
+            ->willReturn($this->getGerichtData()['id']);
+
+        $gericht
+            ->method('getName')
+            ->willReturn($this->getGerichtData()['name']);
+
+        $gericht
+            ->method('getPreis')
+            ->willReturn($this->getGerichtData()['preis']);
 
         $controller = new BestellungController();
         $controller->setContainer($this->getContainerWithSession([
                 'type' => 'bestellung',
-                'message' => 'Pizza wurde erfolgreich zur Bestellung hinzugefügt.',
+                'message' => $this->getGerichtData()['name'] . ' wurde erfolgreich zur Bestellung hinzugefügt.',
             ],
             '/menue'
         ));
@@ -75,12 +86,12 @@ class BestellungControllerTest extends TestCase
         $bestellung
             ->expects($this->once())
             ->method('setStatus')
-            ->with('offen');
+            ->with($this->getBestellungData()['status']);
 
         $bestellung
             ->expects($this->once())
             ->method('getName')
-            ->willReturn('Pizza');
+            ->willReturn($this->getBestellungData()['name']);
 
         $managerRegistry
             ->expects($this->once())
@@ -99,11 +110,11 @@ class BestellungControllerTest extends TestCase
         $controller = new BestellungController();
         $controller->setContainer($this->getContainerWithSession([
                 'type' => 'bestellung',
-                'message' => 'Pizza wurde erfolgreich auf offen gesetzt.',
+                'message' => $this->getBestellungData()['name'] . ' wurde erfolgreich auf offen gesetzt.',
             ],
             '/menue'
         ));
-        $response = $controller->bestellungStatus($bestellung, 'offen', $managerRegistry);
+        $response = $controller->bestellungStatus($bestellung, $this->getBestellungData()['status'], $managerRegistry);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals( 302 , $response->getStatusCode());
@@ -118,7 +129,7 @@ class BestellungControllerTest extends TestCase
 
         $bestellung
             ->method('getName')
-            ->willReturn('Pizza');
+            ->willReturn($this->getBestellungData()['name']);
 
         $managerRegistry
             ->method('getManager')
@@ -136,7 +147,7 @@ class BestellungControllerTest extends TestCase
         $controller = new BestellungController();
         $controller->setContainer($this->getContainerWithSession([
                 'type' => 'bestellung',
-                'message' => 'Pizza wurde erfolgreich entfernt.',
+                'message' => $this->getBestellungData()['name'] . ' wurde erfolgreich entfernt.',
             ],
             '/bestellung'
         ));
@@ -144,17 +155,6 @@ class BestellungControllerTest extends TestCase
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals('/bestellung', $response->getTargetUrl());
-    }
-
-    // todo: implement additional test methods to achieve 100% test coverage
-
-    private function createGerichtMock(): MockObject|Gericht
-    {
-        $gericht = $this->createMock(Gericht::class);
-        $gericht->method('getId')->willReturn(1);
-        $gericht->method('getName')->willReturn('Pizza');
-        $gericht->method('getPreis')->willReturn(10.0);
-        return $gericht;
     }
 
     private function createManagerRegistryMock(): MockObject|ManagerRegistry
@@ -169,14 +169,19 @@ class BestellungControllerTest extends TestCase
             ->method('persist')
             ->with(
                 $this->callback(function ($bestellung) {
-                    return $bestellung instanceof Bestellung &&
-                        $bestellung->getTisch() === 'tisch1' &&
-                        $bestellung->getBestellNummer() === 1 &&
-                        $bestellung->getName() === 'Pizza' &&
-                        $bestellung->getPreis() === 10.0 &&
-                        $bestellung->getStatus() === 'offen';
+                    return $bestellung instanceof Bestellung
+                        && $bestellung->getTisch() === $this->getBestellungData()['tisch']
+                        && (
+                            !empty($bestellung->getBestellNummer())
+                            && is_string($bestellung->getBestellNummer())
+                            && strlen($bestellung->getBestellNummer()) === 13
+                        )
+                        && $bestellung->getName() === $this->getBestellungData()['name']
+                        && $bestellung->getPreis() === $this->getBestellungData()['preis']
+                        && $bestellung->getStatus() === $this->getBestellungData()['status'];
                 })
             );
+
         $entityManager
             ->expects($this->once())
             ->method('flush');
@@ -191,6 +196,7 @@ class BestellungControllerTest extends TestCase
     private function createSessionWithFlashBag(array $flashMessage): Session
     {
         $flashBag = $this->createMock(FlashBagInterface::class);
+
         $flashBag
             ->expects($this->once())
             ->method('add')
@@ -198,9 +204,11 @@ class BestellungControllerTest extends TestCase
                 $flashMessage['type'],
                 $flashMessage['message'],
             );
+
         $flashBag
             ->method('getName')
             ->willReturn('flashes');
+
         $flashBag
             ->method('getStorageKey')
             ->willReturn('flashes');
@@ -220,6 +228,7 @@ class BestellungControllerTest extends TestCase
             ->expects($this->once())
             ->method('has')
             ->willReturn(true);
+
         $containerMock
             ->expects($this->once())
             ->method('get')
@@ -253,5 +262,29 @@ class BestellungControllerTest extends TestCase
             ]);
 
         return $container;
+    }
+
+    private function getGerichtData(): array
+    {
+        return [
+            'id' => 17,
+            'name' => 'Pizza',
+            'beschreibung' => 'Mega lecker',
+            'kategorie' => 14,
+            'preis' => 13.99,
+            'bild' => '50c8f7db59430f4822f2c19bcbc72a7f.jpg',
+        ];
+    }
+
+    private function getBestellungData(): array
+    {
+        return [
+            'id' => 23,
+            'tisch' => 'tisch1',
+            'bestellNummer' => '1721142119925',
+            'name' => $this->getGerichtData()['name'],
+            'preis' => $this->getGerichtData()['preis'],
+            'status' => 'offen',
+        ];
     }
 }

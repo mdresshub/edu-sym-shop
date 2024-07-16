@@ -18,8 +18,8 @@ class Bestellung
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $tisch = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $bestellNummer = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $bestellNummer = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $name = null;
@@ -47,12 +47,12 @@ class Bestellung
         return $this;
     }
 
-    public function getBestellNummer(): ?int
+    public function getBestellNummer(): ?string
     {
         return $this->bestellNummer;
     }
 
-    public function setBestellNummer(?int $bestellNummer): static
+    public function setBestellNummer(?string $bestellNummer): static
     {
         $this->bestellNummer = $bestellNummer;
 

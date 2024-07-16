@@ -30,7 +30,7 @@ class BestellungController extends AbstractController
     {
         $bestellung = new Bestellung();
         $bestellung->setTisch('tisch1');
-        $bestellung->setBestellNummer($gericht->getId());
+        $bestellung->setBestellNummer($this->generateOrderNumber());
         $bestellung->setName($gericht->getName());
         $bestellung->setPreis($gericht->getPreis());
         $bestellung->setStatus('offen');
@@ -68,5 +68,13 @@ class BestellungController extends AbstractController
         $this->addFlash('bestellung', $bestellung->getName() . ' wurde erfolgreich entfernt.');
 
         return $this->redirectToRoute('app_bestellung');
+    }
+
+    private function generateOrderNumber(): string
+    {
+        $timeComponent = time();
+        $randomComponent = random_int(100, 999);
+
+        return (string) ($timeComponent . $randomComponent);
     }
 }
